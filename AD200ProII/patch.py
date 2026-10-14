@@ -14,7 +14,7 @@ Profiles (base V1.05):
   Single-burst protection: Stock. Repeated-burst protection: Reduced.
 - Tier X (Super - 1.05.03):
   2x Accelerated Drain + Lowered HSS Tables C & D (~20% reduction).
-  Expands continuous HSS burst headroom (+23% to +25%).
+  Expands continuous HSS burst headroom (+24% to +26%: 33 -> 41 on Table C, 50 -> 63 on Table D).
   Single-burst protection: Reduced. Repeated-burst protection: Reduced.
 """
 

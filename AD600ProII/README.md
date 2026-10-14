@@ -19,40 +19,40 @@ The version is shown as `1.08.TT` with no leading `v`, because the firmware's 8-
 | **Tier S (Studio)** | `1.08.01` | Fan Level 2 continuous | Active | Stock (80 std / 64 HSS) | Stock (fan-assisted) |
 | **Tier R (Recovery)** | `1.08.02` | Fan Level 2 + 2× primary drain (40 → 80) | Active | Stock | 2× primary drain |
 | **Tier X (Super)** | `1.08.03` | Fan Level 2 + 2× primary drain + Lowered HSS table | Active | 80 std / 80 HSS | 2× primary drain |
-| **Tier R+ (Recovery Plus)** | `1.08.04` | Fan Level 2 + 2× primary drain + **2× secondary drain (40 → 80)** | Active | Stock | **2× on both accumulators** |
-| **Tier X+ (Super Plus)** | `1.08.05` | Fan Level 2 + 2× drain (both) + Lowered HSS table + **Burst throttle bypassed** | **Disabled (Bypassed)** | **80 std / 80 HSS clean** | **2× on both accumulators** |
+| **Tier R+ (Recovery Plus)** | `1.08.04` | Fan Level 2 + 2× primary drain + **2× secondary drain (40 → 80)** | Active | Stock | **2× primary + 2× pre-latch secondary** |
+| **Tier X+ (Super Plus)** | `1.08.05` | Fan Level 2 + 2× drain (both) + Lowered HSS table + **Burst throttle bypassed** | **Disabled (Bypassed)** | **80 std / 80 HSS clean** | **2× on both (throttle disabled)** |
 
 ## Key addresses & verified architecture
 
 | What | Where | Details |
 |---|---|---|
 | Error E2 set from flag `0x20000147` | `0x080103F4` | Triggered exclusively when NTC B drops below 49.69 raw ADC count for > 5 samples (`0x08017360`) |
-| NTC A Thermistor (raw ADC) | `0x2000002C` (`fn_08017120`) | Raw ADC counts (no °C conversion; lower is hotter): < 132.01 (debounce > 5) calls `fn_080103B4` (forced 9.0 s cooldown); < 271.06 trips Fan Level 2; < 356.03 trips Fan Level 1; ≥ 404.52 Fan Level 0 (sensor identity unverified ⚠️) |
-| NTC B Thermistor (raw ADC) | `0x2000002E` (`fn_080172D8`) | Raw ADC counts: < 49.69 (debounce > 5) sets `0x20000147` → Error E2; < 132 or < 86 (debounce > 5) calls `fn_080103B4` (forced 9.0 s cooldown); < 271.06 Fan Level 2; < 311.40 Fan Level 1; ≥ 356.03 Fan Level 0 |
-| Fan level decision / fan GPIO driver | `fn_08017480` / `fn_08010E74` | PC14 = low speed, PC14+PA4+PA7 = high speed; Level 2 if NTC A/B state 2, cooldown active (`0x200000DC == 1`), or `0x2000004E == 2` |
+| NTC A Thermistor — Flash head / modeling lamp (`✅`) | `0x2000002C` (`fn_08017120`) | Raw ADC counts (no °C conversion; lower is hotter): subtracts `10` counts when modeling lamp is on (`[0x2000007B] != 0` at `0x08017126`); < 132.01 (debounce > 5) sets `[0x2000000C] = 1` (throttles/shuts off modeling lamp in `fn_080167FC`) and calls `fn_080103B4` (forced 9.0 s cooldown); < 271.06 Fan Level 2; < 356.03 Fan Level 1; ≥ 404.52 Fan Level 0 |
+| NTC B Thermistor — Main board / IGBT (`✅`) | `0x2000002E` (`fn_080172D8`) | Raw ADC counts: < 49.69 (debounce > 5) sets `0x20000147` → Error E2; < 132.01 or < 86.0 (debounce > 5) calls `fn_080103B4` (forced 9.0 s cooldown); < 271.06 Fan Level 2; < 311.40 Fan Level 1; ≥ 356.03 Fan Level 0 |
+| Fan level decision / fan GPIO driver | `fn_08017480` / `fn_08010E74` | PC14 = low speed, PC14+PA4+PA7 = high speed; Level 2 if NTC A/B state 2, cooldown (`0x200000DC == 1`), or `0x2000004E == 2` (`[r5,#8]`); Level 1 if NTC A/B state 1, `0x2000004C == 1` (`[r5,#6]` secondary latch), `0x2000004E == 1`, or modeling lamp on > 20% (`[0x2000007B] != 0 && [0x20000007] > 20`) |
 | Shutdown / standby flags | `0x200000A6`, `0x20000080` | `0x200000A6`: Low battery cutoff (battery gauge ≤ 3); `0x20000080`: Low-voltage power-down latch (raw ADC < 0x1BA) |
 | Hardware step timer | TIM14 IRQ 45 (`0x0801EE58`) | 200 µs base × 25 (`0x0801F4DC`) × 20 (`fn_08013694`) = **0.100 s (100 ms) nominal / step** (HSI 16 MHz PLL at 168 MHz ±1%, gated by `[0x2000016E] != 0` and `[0x200000A7] == 0`) |
-| Heat counter add / drain | `fn_080134E4` / `fn_08013694` | Primary drain: 50 steps = **5.000 s nominal** (stock: 8.0 pts/s; Tier R/X/R+/X+: 16.0 pts/s; extra idle drain ~1.86×) |
+| Heat counter add / drain | `fn_080134E4` / `fn_08013694` | Primary drain: 50 steps = **5.000 s nominal** (stock: 8.0 pts/s; Tier R/X/R+/X+: 16.0 pts/s; plus `-5 / 4.0 s` = `1.25 pts/s` at `0x080136D8` when HSS is off `[0x20000E80+3] == 0` ✅) |
 | Heat state struct | `0x20000046` (accumulator `+0xE` = `0x20000054`) | Idle timer `[+0xC]` = 1200 steps (**120.0 s** outside cooldown; clears accumulator at 0) |
 | Accumulator, threshold | `0x20000054`, 6400 (`0x0801358E`) | Cooldown hold `[r5]` = 10..80 steps (1.0..8.0 s; 9.0 s thermal-forced); `[+0x10]` = 3000 steps (**300.0 s post-trip window**) |
 | Fan-demand stages from accumulator (`0x2000004E`) | > 4000 → 2 (`0x080135AC`), ≥ 2000 → 1 (`0x080135B6`) | Active in stock firmware |
 | Cooldown penalty counter `[+1]` | +3 while ≤ 40, then +1, cap 80 (`0x08013522`–`0x080135D2`) | Added on each flash during cooldown |
-| Secondary burst accumulator / window / lock | `[+0x16]` (threshold 3000), `[+0x14]` (300 = 30.0 s), lock `0x2000004A` | Triggers after ~38 full-power shots |
+| Secondary burst accumulator / window / lock | `[+0x16]` (threshold 3000), `[+0x14]` (300 = 30.0 s), lock `0x2000004A` (`[r5,#4] = 5` = **0.5 s pause**), latch `0x2000004C` (`[r5,#6]`) | Triggers after ~38 full-power shots (30 HSS); latch clears only after 30.0 s without flashes |
 | Charge gate (cooldown `0x200000DB`, lock `0x2000004A`) | `0x08011344`–`0x08011370` | Halts or delays capacitor charging |
-| Heat tables | `0x080398B8` (standard), `0x080398F0` (selected by `0x200000DD`) | `0x080398F0` set after 105-pulse HSS sequence (status 🔶) |
+| Heat tables | `0x080398B8` (standard), `0x080398F0` (selected by `0x200000DD`) | ✅ `0x080398F0` linked from UI `'HSS'` (`[0x20000E80,#3]` / bit 4 of `0x2000009D`) → mode `0x1A` in `0x200000D5` → `fn_0801F6C0` (105-pulse loop) & `fn_0801F674` → `0x200000DD = 1` |
 | Power map / UI formatter | `0x0803985C` (maps $P=0$ to index 27) / `fn_08016aac` (`0x08016aac`) | Exact 1/10-stop EV mapping |
 | Multi-mode stroboscopic table | `0x08039A65` | Flash count vs frequency vs power table (7 rows × 13 cols, $P=20 \dots 80$, 1/4 to 1/256) |
 
 ## Secondary burst throttle
 
-✅ Read from the disassembly, not tested on hardware. After the main heat counter is updated, `fn_080134E4` runs a second, short-window accumulator:
+✅ Verified in disassembly (`fn_080134E4` and `fn_08013694`). After the main heat counter is updated, `fn_080134E4` runs a second, short-window accumulator:
 
-- Every flash adds the same table cost to `[0x20000046+0x16]` and reloads a 300-step window `[+0x14]`. The drain routine removes 40 points every 20 window steps, and clears the state when the window runs out.
-- At **3000 points** it sets the lock byte `0x2000004A` = 5, fan demand `0x2000004E` = 2, and latch `0x2000004C` = 1.
-- While latched, every later flash re-arms the lock if the table index is ≥ 24 (top power steps, about 1/1 to 1/2) or the alt table is active.
+- **Pre-latch (`0x2000004C == 0`):** Every flash adds the same table cost to `[0x20000046+0x16]` and reloads the 300-step (`30.0 s`) window `[+0x14]` (`0x08013606`–`0x0801361A`). The drain routine (`0x08013742`–`0x0801374F`) subtracts 40 points (80 in Tier R+/X+) every 20 window steps (`2.0 s`), accelerating pre-latch recovery between bursts so the accumulator drains before reaching 3000.
+- **Trip at 3000 points (`0x0801361E`–`0x0801362E`):** Sets the lock byte `0x2000004A` (`[r5,#4]`) = 5 (decremented every 0.1 s step at `0x08013750`–`0x08013756` for a **0.5 s charge pause**), fan demand `0x2000004E` (`[r5,#8]`) = 2, and latch `0x2000004C` (`[r5,#6]`) = 1.
+- **Post-latch (`0x2000004C == 1`):** Every later flash takes the branch at `0x080135EC`–`0x08013604`, which **never reads or adds to `[+0x16]`**, re-arms `0x2000004A = 5` (**0.5 s pause**) if the table index is ≥ 24 (1/1 to 1/2) or `0x200000DD != 0` (HSS), and reloads `[+0x14] = 300` (**30.0 s**) on every flash. Periodic draining of `[+0x16]` to 0 (`0x0801374A`) does **not** clear `0x2000004C`; the latch only clears when `[+0x14]` expires to 0 after **30.0 s with zero flashes** (`0x0801373A`).
 - The charge gate at `0x0801135C` treats a non-zero `0x2000004A` the same way as the main cooldown flag `0x200000DB`.
 
-In practice the unit starts inserting charge pauses after about **38 rapid full-power shots** (30 in alt-table mode), well before the 80-shot main cooldown.
+In practice the unit starts inserting 0.5 s charge pauses after **38 rapid full-power shots** (30 in HSS mode), well before the 80-shot main cooldown.
 
 ## Comparison with AD600BM II v1.02
 
@@ -67,10 +67,10 @@ The AD600BM II is known to allow longer bursts than the Pro II. Its v1.02 firmwa
 | Fan-demand stages | 4000 / 2000 | 4800 / 2400 |
 | **Secondary burst throttle** | **Active** (3000 pts) | **Dead code**: drain, charge gate (`0x08010BB2`) and fan check (`0x080160DA`) still read the fields, but the add routine never writes them |
 | Cooldown penalty | +3 then +1, cap 80 | +1, cap 30 |
-| Index from `[+2]` when mode bits = 0 (⚠️ mode not identified) | 6 … 27 | 3 … 24 (one table step cheaper at every level) |
+| Index from `[+2]` when mode bits = 0 (**TTL mode** ✅: `[0x20000048]` from pre-flash `0x200000E1` + FEC `0x200000D4`) | 6 … 27 | 3 … 24 (one table step cheaper at every level) |
 | Alt table | `25 … 100` | `30 … 120` (**stricter**) |
-| Extra conditional drain (−5 / 40 steps, `0x080136D8`) | Present | Absent (**stricter**) |
-| Raw ADC thermistor thresholds | 356.03 / 311.40 / 271.06 / 132.01 / 49.69 | Same, minus 49.69 |
+| Extra conditional drain (−5 / 40 steps when HSS Off `[0x20000E80+3] == 0`, `0x080136D8`) | Present | Absent (**stricter**) |
+| Raw ADC thermistor thresholds (NTC A / NTC B) | NTC A (`fn_08017120`): `404.52 / 356.03 / 271.06 / 132.01`<br>NTC B (`fn_080172D8`): `356.03 / 311.40 / 271.06 / 132.01 / 86.0 / 49.69 (E2)` | NTC A (`fn_08015DAC`): `404.52 / 356.03 / 311.40 / 271.06 / 176.32` (**stricter** forced cooldown `< 176.32`)<br>NTC B (`fn_08015F10`): `356.03 / 311.40 / 271.06 / 235.70 / 132.01` (fan 2 `< 235.70`, fan 1 `< 271.06`, cooldown `< 132.01`, no `49.69` / no `E2`) |
 
 Shots until the main counter trips, in a continuous burst from empty (each flash resets the idle timer, so nothing drains):
 

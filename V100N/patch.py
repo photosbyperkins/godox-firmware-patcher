@@ -10,7 +10,7 @@ Version scheme: <Godox version>.<tier code>, e.g. 1.04.02 (see tools/fwversion.p
 Profiles (base V1.04):
 ----------------------
 - Tier R (Recovery - 1.04.02):
-  2x Accelerated Leaky Bucket Recovery (Both accumulators: 50 -> 100).
+  2x Accelerated Leaky Bucket Recovery (Primary & pre-latch secondary: 50 -> 100).
   Single-burst protection: Stock. Repeated-burst protection: Reduced.
 - Tier X (Super - 1.04.03):
   2x Accelerated Drain + Lowered ALT (HSS) Table across all 11 rows (20% reduction).

@@ -13,11 +13,11 @@ Version scheme: <Godox version>.<tier code>, e.g. 1.02.02 (see tools/fwversion.p
 Profiles (base V1.02):
 ----------------------
 - Tier R (Recovery - 1.02.02):
-  2x drain on both primary & secondary accumulators (80 -> 160 pts per 6.0 s).
+  2x drain on primary & pre-latch secondary accumulators (80 -> 160 pts per 6.0 s).
   Single-burst protection: Stock. Repeated-burst protection: Reduced.
 
 - Tier X (Super - 1.02.03):
-  Tier R + multi-pulse (likely HSS) table lowered ~20% on all 11 rows (60/80/150 -> 48/64/120).
+  Tier R + multi-pulse HSS table lowered ~20% on all 11 rows (60/80/150 -> 48/64/120).
   Top-column multi-pulse burst: 40 -> 50 shots to primary cooldown, 14 -> 17 to secondary throttle.
   Single-burst protection: Reduced. Repeated-burst protection: Reduced.
   Caution: The iT30Pro is a small, fanless unit with low thermal mass.
@@ -66,8 +66,9 @@ SUPER_HSS_ROW    = [48]*16 + [64]*3 + [120]*3
 #   +0x10  18 bytes  original filename "iT30ProN_V1.02.bin" (not NUL-terminated)
 #   +0x22   u16 LE   filename length (0x0012)
 #   +0x24   8 bytes  magic AA 55 66 99 77 88 22 33
-# The application contains no MD5 code, so the check is done by the G3 updater
-# and/or the bootloader. Any patch inside [0, 0xA8000) must refresh the MD5.
+# Neither the application nor Godox_G3_v1.1.exe contains MD5 code, so the check is
+# performed by the on-chip bootloader (or a newer host tool). Any patch inside
+# [0, 0xA8000) must refresh the MD5.
 FOOTER_OFF   = 0xA8000
 FOOTER_MAGIC = bytes.fromhex("aa55669977882233")
 

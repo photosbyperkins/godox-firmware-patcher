@@ -34,10 +34,10 @@ Custom builds use a three-part version: **`<Godox version>.<tier code>`**.
 | Tier code | Profile | Core Modification | Single-Burst Limit | Inter-Burst Recovery | Recommended Use Case |
 |---|---|---|---|---|---|
 | *(none)* | **Factory** | Official Godox OEM firmware (e.g. `1.08`) | Factory stock | Factory stock | Standard field / battery shooting |
-| **`.01`** | **Tier S (Studio)** | Continuous Fan Level 2 (100% PWM) | Factory stock | Factory stock *(enhanced cooling)* | AC adapter studio work / modeling lamp |
+| **`.01`** | **Tier S (Studio)** | Continuous Fan Level 2 (high speed) | Factory stock | Factory stock *(enhanced cooling)* | AC adapter studio work / modeling lamp |
 | **`.02`** | **Tier R (Recovery)** | 2× faster drain (+ Fan on AD600 / AD100) | Factory stock | 2× primary recovery | Fast turnaround (portraits, events) |
-| **`.03`** | **Tier X (Super)** | 2× drain + ~20% lower HSS cost | **+23% to +25% burst** | 2× primary recovery | Action / HSS bursts |
-| **`.04`** | **Tier R+ (Recovery+)** | Continuous Fan + 2× drain on **both** accumulators | Factory stock | **2× on all pauses** | Synchronized inter-burst recovery |
+| **`.03`** | **Tier X (Super)** | 2× drain + ~20% lower HSS cost | **+24% to +26% burst** | 2× primary recovery | Action / HSS bursts |
+| **`.04`** | **Tier R+ (Recovery+)** | Continuous Fan + 2× drain on primary & pre-latch secondary accumulators | Factory stock | **2× primary + 2× pre-latch secondary** | Synchronized pre-throttle burst recovery |
 | **`.05`** | **Tier X+ (Super+)** | Continuous Fan + 2× drain (both) + Lowered HSS + **Throttle bypassed** | **80 shots clean (no stutter)** | **2× on all pauses** | Maximum performance / continuous bursts |
 
 ---
@@ -57,7 +57,7 @@ Detailed reverse-engineering specifications are documented in [**TIERED_RATINGS.
 | **Tier S (Studio)** | `AD600PROII_v1.08.01_studio.bin` | `d85d22f05b84e5d259250da3c618f776e340f75d4f98dce922cc91f6c56c62ab` | Fan Level 2 continuous |
 | **Tier R (Recovery)** | `AD600PROII_v1.08.02_recovery.bin` | `d51033cc1dd911764b9995ef81dee7e449ab8db6ef3c2886c7c414c386ee63de` | Fan Level 2 + 2× pause drain (40 → 80 pts) |
 | **Tier X (Super)** | `AD600PROII_v1.08.03_super.bin` | `a9b4b0f5fc18a44d1e0af5a1e03db9da199fabfdcc4737c6a7f8f734cd780d27` | Fan Level 2 + 2× drain + HSS table patched |
-| **Tier R+ (Recovery+)** | `AD600PROII_v1.08.04_recovery_plus.bin` | `69b27c2789c9604db6aa6bab507e02303f3fb3f07c308076b1c17eb11a849114` | Fan Level 2 + 2× drain on primary & secondary burst accumulators |
+| **Tier R+ (Recovery+)** | `AD600PROII_v1.08.04_recovery_plus.bin` | `69b27c2789c9604db6aa6bab507e02303f3fb3f07c308076b1c17eb11a849114` | Fan Level 2 + 2× drain on primary & pre-latch secondary burst accumulators |
 | **Tier X+ (Super+)** | `AD600PROII_v1.08.05_super_plus.bin` | `c62e16a60bee7cf534469e19dfc6acf21f821b7c3ecc570063099c58e2e0109e` | Fan Level 2 + 2× drain (both) + HSS table + Secondary burst throttle bypassed |
 
 ### 2.2 Godox AD200Pro II
@@ -76,7 +76,7 @@ Detailed reverse-engineering specifications are documented in [**TIERED_RATINGS.
 |---|---|---|---|
 | **OEM Stock** | `AD100ProII_RF433V1_07.bin` | `5dd2dd434e0ca531a57fd5ad397a9de1cf4e8acf2374aa6bfc5d7fed17c135dc` | Factory baseline |
 | **Tier S (Studio)** | `AD100ProII_V1.07.01_studio.bin` | `8995f2b85fe0380282913d4d0697b7d3709d457b68257f6df2d57aec6eb55cc2` | Fan forced on (`0x080143A2`: `29 78` → `24 E0`) |
-| **Tier R (Recovery)** | `AD100ProII_V1.07.02_recovery.bin` | `86386df6319f9e4ba3719e514525f565968d7a456c424008d26ba7eb892006bc` | Continuous Fan + 2× drain on primary (`25`→`50`) & secondary (`30`→`60`) |
+| **Tier R (Recovery)** | `AD100ProII_V1.07.02_recovery.bin` | `86386df6319f9e4ba3719e514525f565968d7a456c424008d26ba7eb892006bc` | Continuous Fan + 2× drain on primary (`25`→`50`) & pre-latch secondary (`30`→`60`) |
 | **Tier X (Super)** | `AD100ProII_V1.07.03_super.bin` | `71ad25e7f833f655fa129a6e37f048ed0baba09e1ce34e21f325834765d6b381` | Continuous Fan + 2× drain + Table Set 2 (HSS `0x26F48`) lowered ~20% |
 
 ### 2.4 Godox V100N
@@ -85,7 +85,7 @@ Detailed reverse-engineering specifications are documented in [**TIERED_RATINGS.
 | Build | Output Filename | Target SHA-256 Checksum | Modifications |
 |---|---|---|---|
 | **OEM Stock** | `V100N_V1.04.bin` | `18e3581c601cc7c15e81bbbe951b8b336e133de822f99450f57f116ffab37ee6` | Factory baseline |
-| **Tier R (Recovery)** | `V100N_V1.04.02_recovery.bin` | `f3855ac2132eade59df334b4d1d406c38689d72ab4d91be9ba6c8cbb8ebba80d` | 2× drain (50 → 100 on both accumulators) |
+| **Tier R (Recovery)** | `V100N_V1.04.02_recovery.bin` | `f3855ac2132eade59df334b4d1d406c38689d72ab4d91be9ba6c8cbb8ebba80d` | 2× drain (50 → 100 on primary & pre-latch secondary accumulators) |
 | **Tier X (Super)** | `V100N_V1.04.03_super.bin` | `af32bb854c4a7551029874151a930210ef0cb1cb3a9ecc3acd4df72bdbba383c` | 2× drain + ALT (HSS) table lowered 20% across all 11 rows |
 
 ### 2.5 Godox iT30Pro (Nikon, iT30ProN)
@@ -94,7 +94,7 @@ Detailed reverse-engineering specifications are documented in [**TIERED_RATINGS.
 | Build | Output Filename | Target SHA-256 Checksum | Modifications |
 |---|---|---|---|
 | **OEM Stock** | `iT30ProN_V1.02.bin` | `a6920833d267834e7ff41f537ce8b897bab47234013731ae79b4affcbf41847e` | Factory baseline |
-| **Tier R (Recovery)** | `iT30ProN_V1.02.02_recovery.bin` | `13357697a6aa2c56afd15727f9f32148f5c11e6954e205337fa7031b0d317c27` | 2× drain (80 → 160 on both accumulators) |
+| **Tier R (Recovery)** | `iT30ProN_V1.02.02_recovery.bin` | `13357697a6aa2c56afd15727f9f32148f5c11e6954e205337fa7031b0d317c27` | 2× drain (80 → 160 on primary & pre-latch secondary accumulators) |
 | **Tier X (Super)** | `iT30ProN_V1.02.03_super.bin` | `eebbc0210a912dff953cff3a89a0cbba722ef847bc1b2400480676bb6f9afaac` | 2× drain + multi-pulse table lowered ~20% across all 11 rows |
 
 ### 2.6 Verified Power Mapping, Zoom Rows & Hardware Timing
@@ -104,17 +104,19 @@ Disassembly analysis of GUI rendering routines (`tbb` branch tables), SRAM state
 * **Internal Power Variable ($P$):** Stored in SRAM as 1/10-stop decrements below full power ($P = 0$ is **1/1 full power**, $P = 10$ is **1/2**, $P = 20$ is **1/4**, etc.).
 * **UI Disassembly Verification:**
   * **AD600Pro II (`fn_08016aac`):** Renders fraction mode (1/1 to 1/512) and decimal mode (10.0 to 1.0). When $P = 0$, table branch `0x08016ad4` routes to `'1'` (1/1) or `'10.0'`. Table `0x0803985C` maps $P = 0$ to top index **27** (80 pts $\rightarrow$ exactly **80 shots** to the 6400 limit).
-  * **AD200Pro II (`0x080148be` / `0x08014914`):** Renders 1/1 to 1/256 (or 1/512 for heads 1, 2, 3; capped at 1/128 in special modes). When $P = 0$, branch `0x08014938` loads denominator 1 (1/1). Table `0x0804143E` maps $P = 0$ to top index **24** (150 pts for heads {0, 1} [standard fresnel H200] $\rightarrow$ **40 shots**; 100 pts for heads {2, 3, 4} [H200R / H200J / R200] $\rightarrow$ **60 shots** to the 6000 limit).
-  * **AD100Pro II (`fn_08010fec`):** Byte table `0x08032CD0` maps $P = 0$ to top column **24** (1/1). Table Set 1 (`0x08032D22`) row 0 costs 100 pts at 1/1 (**60 shots** to the 6000 limit); rows 4–7 cost 60 pts (**100 shots**). What the row (`[0x20000001] & 7`) means is untraced ⚠️. Internal cooling fan on GPIOC Pin 4 is driven via `fn_080100a2` and controlled by `fn_08014370` (in stock firmware: on while the accumulator is above 1200 points or the thermistor reads below 271 raw counts).
+  * **AD200Pro II (`0x080148be` / `0x08014914`):** Renders 1/1 to 1/256 (or 1/512 for heads 1, 2, 3; capped at 1/128 in special modes). When $P = 0$, branch `0x08014938` loads denominator 1 (1/1). Table `0x0804143E` maps $P = 0$ to top index **24** (150 pts for heads {0, 1} [standard fresnel H200] $\rightarrow$ **40 shots**; 100 pts for heads {2, 3, 4} [H200R / H200J / R200] $\rightarrow$ **60 shots** to the 6000 limit; **50 shots** to the 7500 primary limit when `H200 II` [`0x20000095 == 6`] is attached).
+  * **AD100Pro II (`fn_08010fec`):** Byte table `0x08032CD0` maps $P = 0$ to top column **24** (1/1). Row (`[0x20000001] & 7`) is verified in `fn_08013718` (`0x08013BF4`) and `fn_08016024` (`0x080160BA`) as the **5-step Zoom Focal Length setting (`0..4` = `28, 35, 50, 70, 85` mm)**: Table Set 1 (`0x08032D22`) Row 0 (`28 mm`) costs 100 pts at 1/1 (**60 shots** to the 6000 limit), Row 1 (`35 mm`) costs 90 pts (**67 shots**), Row 2 (`50 mm`) costs 80 pts (**75 shots**), Row 3 (`70 mm`) costs 70 pts (**86 shots**), and Rows 4–7 (`85 mm`) cost 60 pts (**100 shots**). Internal cooling fan on GPIOC Pin 4 is driven via `fn_080100a2` and controlled by `fn_08014370` (in stock firmware: on while the accumulator is above 1200 points, the thermistor reads below 271 raw counts, or the modeling lamp is ≥ 60%).
   * **V100N (`fn_08011670` / `fn_0800ec4c`):** Renders 1/1 to 1/256 (capped at 80). `fn_0800ec4c` maps $P < 3$ ($P = 0$) to top column **21** (86 to 60 pts across zoom rows $\rightarrow$ **70 to 100 shots** to the 6000 limit).
-* **V100N Zoom Row Mapping:** Row = index + 1 from table `0x08051694` (11 entries). Row 0 is the special `0x200004DE == 1` flag (wide panel / bounce); Rows 1–10 map to focal lengths `20, 24, 28, 35, 50, 70, 80, 105, 135, 200` mm. Table `0x080516A0` is a charge-control table, not motor steps.
-* **Step Timing (0.100 s / step):** All models utilize a synchronized 2-stage prescaler timer architecture yielding **0.100 s (100 ms)** nominal per step (derived from internal RC oscillators ±1% on AD600/AD200/AD100; GD32F4 IRC16M at 240 MHz with TIMERSEL set on V100N), gated by active run-state flags. Leaky-bucket drain intervals (50 timer steps) execute every **5.000 s** nominal.
+  * **iT30ProN (`fn_080109bc` / `fn_08013b54`):** Power byte $P = 0 \dots 70$ (1/1 down to 1/128 in 1/10-stop increments, clamped to $\le 40$ = 1/16 in HSS) maps 3/3/4 tenths per stop into columns **21..0** ($P \le 2 \rightarrow$ top column **21**: 300 pts in row 0 $\rightarrow$ **20 shots**, 200 pts in row 1 $\rightarrow$ **30 shots** to the 6000 limit).
+* **V100N Zoom Row Mapping:** Row = index + 1 from table `0x08051694` (11 entries). Row 0 is the special `0x200004DE == 1` flag (wide panel / bounce); Rows 1–10 map to focal lengths `20, 24, 28, 35, 50, 70, 80, 105, 135, 200` mm. Table `0x0805169E` is a capacitor charge-duration table, not motor steps.
+* **Step Timing (0.100 s / step):** All five models utilize a synchronized 2-stage prescaler timer architecture yielding **0.100 s (100 ms)** nominal per step (derived from internal 16 MHz HSI RC oscillators ±1% with PLL at 168 MHz and 84 MHz APB1 timer clocks on AD600, AD200, AD100, and iT30ProN; GD32F4 IRC16M at 240 MHz with TIMERSEL set on V100N), gated by active run-state flags. Leaky-bucket drain intervals execute every **5.000 s** nominal (50 timer steps; **6.000 s** / 60 steps on iT30ProN).
 * **Physical Thermal Sensors & Protections:**
-  * **AD600Pro II:** Dual NTC thermistors compare directly against raw ADC counts (no temperature conversion to °C exists in firmware; lower ADC count = hotter). NTC B dropping below 49.69 raw ADC triggers Error E2; either NTC dropping below 132 raw ADC triggers a 9.0 s forced cooldown (`fn_080103B4`); raw ADC below 271.06 and 356.03 engage fan levels 2 and 1. Which physical sensor is flash tube vs IGBT heatsink is not determinable from code.
-  * **AD200Pro II:** ADC1 IN2 raw float threshold (< 541.42 for 101 calls sets `0x20000124`; after 12,000 ticks sets `0x2000005E`). Sensor type is unknown (no temperature conversion in code).
+  * **AD600Pro II:** Dual NTC thermistors compare directly against raw ADC counts (no temperature conversion to °C exists in firmware; lower ADC count = hotter). **NTC A (`0x2000002C`, `fn_08017120`)** is coupled to the LED modeling lamp (`-10` ADC count offset when lamp is on, and sets `0x2000000C = 1` below 132.01 to throttle/shut off the modeling lamp in `fn_080167FC` → head sensor); **NTC B (`0x2000002E`, `fn_080172D8`)** drops below 49.69 raw ADC to trigger Error E2 (main board / IGBT sensor). Either NTC dropping below 132 raw ADC triggers a 9.0 s forced cooldown (`fn_080103B4`); raw ADC below 271.06 and 356.03 engage fan levels 2 and 1.
+  * **AD200Pro II:** Two head overheat sensor paths: (1) **Analog head NTC on ADC `0x200000AE` (`fn_08015C78`)** triggers forced primary cooldown (`fn_0800E1E4`) below 132 raw ADC and severe overheat (`[0x200001BA] = 5`, blinking red thermometer icon) below 75 raw ADC (recovers $\ge 235$); (2) **`H200 II` digital NTC via bit-banged I2C slave `0x5C` reg `0x06` (`[0x200001E6]` in `fn_080237B0`)** triggers forced cooldown below 396 and severe overheat (`[0x200001CF] = 5`, modeling lamp shutoff) below 260 (recovers $\ge 816$). `fn_080237B0` also directly switches the `H200 II` cooling fan via I2C reg `0x01` (`[0x200001CC]`). *(Note: `0x200000A4` `< 541.42` in `fn_0800C8EC` is the battery voltage monitor, not a thermal sensor).*
   * **AD100Pro II:** One NTC, raw ADC at `0x20000010` (`fn_08014234`; no °C conversion, lower = hotter). > 950 / < 20 = sensor fault (self-test `NTC:E1` / `NTC:E2`); < 114.59 forces the 300 s throttled cooldown (`fn_0800e178`), recovering at ≥ 204.14; < 271.06 / < 356.03 set fan states 2 / 1.
-  * **V100N:** Real NTC thermistor path via ADC0 DMA average (`0x200004B6`) forces cooldown trip when < 98.98 raw count (`fn_0800D544`, recovers at ≥ 176.3). In software, secondary thermal accumulator (`[+0x10]`, threshold 3000) drives a per-flash hard charge inhibit of 0–1.5 s via `fn_0800E52C` (charger-off GPIO pin) under heavy bursts until 120 s without flashes.
-* **Exact Integer Thresholds:** All models evaluate accumulator trip points with `cmp` + `blo` ($\ge \text{threshold}$), confirming continuous burst limits from empty are exact mathematical boundaries.
+  * **V100N:** Real NTC thermistor path via ADC0 DMA average (`0x200004B6`) forces cooldown trip when < 98.98 raw count (`fn_0800D544`, recovers at ≥ 176.3). In software, secondary thermal accumulator (`[+0x10]`, threshold 3000) latches a per-flash hard charge inhibit of 0–1.5 s via `fn_0800E52C` (charger-off GPIO pin) under heavy bursts until 120 s without flashes.
+  * **iT30ProN:** Dual NTC thermistors at `0x20000520` (`fn_08025B88`: raw ADC 20–203 for > 10 samples forces 600 s cooldown via `fn_0800FA1C`, recovers $\ge 235$) and `0x20000522` (`fn_0801797C`: raw ADC < 183 for > 10 samples forces cooldown via `fn_0800FA1C`).
+* **Exact Integer Thresholds:** All models evaluate accumulator trip points with `cmp` + `blo` ($\ge \text{threshold}$), confirming continuous burst limits from empty are exact mathematical boundaries ($\lceil \text{threshold} / \text{cost} \rceil$).
 
 ---
 
@@ -252,4 +254,4 @@ The on-screen version only tells you the base firmware and the tier. A patcher f
 |---|---|---|---|---|
 | 2026-10-11 | AD100Pro II | S, R, X | **Initial release.** Clean-room disassembly and reverse engineering of AD100Pro II v1.07 (`AD100ProII_RF433V1_07.bin`). Built Tier S (`1.07.01` continuous active fan on GPIOC Pin 4), Tier R (`1.07.02` fan + 2× drain on primary and secondary accumulators), and Tier X (`1.07.03` fan + 2× drain + 20% reduced HSS table expanding full-power burst to 75 shots). | — |
 | 2026-10-10 | All | All tiers | **Version scheme standardization.** Adopted unified `<Godox version>.<tier code>` string format across all models, and standardized patchers to `patch.py`. The version is patched as fixed text, and digit immediates stay stock. The AD200Pro II and V100N settings-menu version readout is now patched as well. Thermal patches are unchanged. | Early experimental images |
-| 2026-10-10 | iT30ProN | R, X | **MD5 footer fix.** The first iT30ProN images kept the stock MD5 at `0xA8000`, so G3 or the bootloader would most likely have rejected them (which of the two checks it is still unconfirmed). The patcher now recomputes it. | R `b9454658f204a4bf3a3cce4abb1b5f715132564b4925b7f638bc432e57ad5e78`, X `cee4c7bd45f6e30d44efc1f43b4eec0cd19443ecdefbbba08580f602125e8093` |
+| 2026-10-10 | iT30ProN | R, X | **MD5 footer fix.** The first iT30ProN images kept the stock MD5 at `0xA8000`, which the on-chip bootloader (or a newer updater tool; `Godox_G3_v1.1.exe` only checks `size <= 1 MB`) would reject. The patcher now recomputes it. | R `b9454658f204a4bf3a3cce4abb1b5f715132564b4925b7f638bc432e57ad5e78`, X `cee4c7bd45f6e30d44efc1f43b4eec0cd19443ecdefbbba08580f602125e8093` |

@@ -10,7 +10,7 @@ Version scheme: <Godox version>.<tier code>, e.g. 1.08.02 (see tools/fwversion.p
 Profiles (base v1.08):
 ----------------------
 - Tier S (Studio - 1.08.01):
-  Continuous Level 2 Fan (100% PWM). Single-burst & repeated-burst protection: Stock.
+  Continuous Level 2 Fan (high speed via PC14+PA4+PA7). Single-burst & repeated-burst protection: Stock.
 - Tier R (Recovery - 1.08.02):
   Continuous Level 2 Fan + 2x Inter-burst Drain (80 pts).
   Single-burst protection: Stock. Repeated-burst protection: Reduced (fan-assisted).
@@ -18,7 +18,7 @@ Profiles (base v1.08):
   Continuous Level 2 Fan + 2x Inter-burst Drain + Lowered table at 0x080398F0.
   Single-burst protection: Reduced. Repeated-burst protection: Reduced.
 - Tier R+ (Recovery+ - 1.08.04):
-  Tier R + 2x drain on the secondary burst accumulator.
+  Tier R + 2x pre-latch drain on the secondary burst accumulator.
 - Tier X+ (Super+ - 1.08.05):
   Tier R+ + lowered table + secondary burst throttle bypassed.
 """
@@ -47,8 +47,8 @@ SEC_DECAY_SUB_OFFSET       = 0x7748     # 0x08013748: subs r0, #40 -> subs r0, #
 BURST_THROTTLE_BRANCH_OFF  = 0x761C     # 0x0801361C: blo 0x08013632 -> b 0x08013632
 HSS_TABLE_OFFSET           = 0x2D8F0    # 0x080398F0: 28 halfwords
 # Version is stored as literal text "v1.08" in two 8-byte slots (ADR at 0x0801B666/0x0801B68C
-# and 0x0801E25C). "1.08.02" is 7 chars + NUL, so the leading "v" is dropped to fit.
-VER_STRINGS = [0xF738, 0x123FC]         # 0x0801B738 (menu), 0x0801E3FC (device info)
+# and 0x0801E25C/0x0801E49C). "1.08.02" is 7 chars + NUL, so the leading "v" is dropped to fit.
+VER_STRINGS = [0xF738, 0x123FC]         # 0x0801B738 (device info popup), 0x0801E3FC (settings menu row 15)
 
 ORIGINAL_HSS_TABLE = [
     25, 25, 25, 25, 25, 25,

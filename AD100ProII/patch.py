@@ -11,16 +11,16 @@ Profiles (base V1.07):
 ----------------------
 - Tier S (Studio - 1.07.01):
   Continuous Active Cooling Fan (GPIOC Pin 4 forced on by fn_08014370, except when
-  the 0x2000007A inhibit flag is set).
+  the 0x2000007A low-battery cutoff flag is set).
   Single-burst & repeated-burst protection: Stock.
 - Tier R (Recovery - 1.07.02):
   Continuous Active Cooling Fan + 2x Inter-burst Drain on both accumulators
-  (Primary: 25 -> 50 pts, Secondary: 30 -> 60 pts per 5.0 s).
+  (Primary: 25 -> 50 pts, Pre-latch Secondary: 30 -> 60 pts per 5.0 s).
   Single-burst protection: Stock. Repeated-burst protection: Reduced (fan-assisted).
 - Tier X (Super - 1.07.03):
   Continuous Active Cooling Fan + 2x Inter-burst Drain + Lowered Table Set 2
-  (believed to be the HSS table; the flag setter has not been located)
-  (~20% reduction across all 11 modes, max 100 -> 80 pts).
+  (verified HSS table at 0x08032F48; flag [0x20000028,#0xD] set after 100/105-pulse
+  HSS trains in fn_08012334 and fn_08017A8C) (~20% reduction across all 11 rows, max 100 -> 80 pts).
   Single-burst protection: Reduced (+25% burst headroom, 60 -> 75 shots at 1/1).
   Repeated-burst protection: Reduced (fan-assisted).
 """
