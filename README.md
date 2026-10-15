@@ -195,7 +195,7 @@ To revert to factory firmware at any time:
 * [**`TIERED_RATINGS.md`**](TIERED_RATINGS.md) — Detailed technical breakdown of Tier S, Tier R, and Tier X profiles, thermal mechanisms, and shot count comparisons.
 * [**`firmware_comparison_analysis.md`**](firmware_comparison_analysis.md) — Architectural comparison across all analyzed Godox flash models.
 * Model-specific guides:
-  * [`AD600ProII/SUPER_MODE.md`](AD600ProII/SUPER_MODE.md) — AD600Pro II byte diffs and reverse-engineering details.
+  * [`AD600ProII/README.md`](AD600ProII/README.md) — AD600Pro II architecture, byte diffs, and reverse-engineering details.
   * [`AD200ProII/README.md`](AD200ProII/README.md) — AD200Pro II per-shot tables, 6000 threshold, and head-selection logic.
   * [`AD100ProII/README.md`](AD100ProII/README.md) — AD100Pro II per-shot tables, 6000 threshold, active fan driver, and HSS tables.
   * [`V100N/README.md`](V100N/README.md) — V100N dual-accumulator architecture and 11×22 matrix details.
@@ -208,8 +208,7 @@ To revert to factory firmware at any time:
 ```
 ├── AD600ProII/                   # Flagship 600Ws strobe
 │   ├── patch.py                  # Multi-tier patcher (1.08.01 - 1.08.05)
-│   ├── SUPER_MODE.md             # Technical reference & byte diff
-│   ├── README.md
+│   ├── README.md                 # Technical reference & byte diff
 │   └── disasm/                   # Disassembly listings & symbol tables
 ├── AD200ProII/                   # 200Ws modular pocket strobe
 │   ├── patch.py                  # Multi-tier patcher (V1.05.02, V1.05.03)
