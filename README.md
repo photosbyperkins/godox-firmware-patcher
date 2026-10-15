@@ -5,6 +5,18 @@ Open-source reverse-engineering analysis, technical documentation, and experimen
 Primary development focus: **Godox AD600Pro II**  
 Secondary supported models: **Godox AD200Pro II**, **Godox AD100Pro II**, **Godox V100N**, **Godox iT30Pro (Nikon)** *(flashing & LCD version confirmed on hardware across all models)*
 
+### 📖 Model Documentation & Guides
+| Model | Category | Readme Guide | Hardware Status |
+|---|---|---|---|
+| **AD600Pro II** | Flagship 600Ws strobe (Focus Model) | [`AD600ProII/README.md`](AD600ProII/README.md) | ✅ Flashing, version & Level 2 fan confirmed |
+| **AD200Pro II** | Modular 200Ws pocket strobe | [`AD200ProII/README.md`](AD200ProII/README.md) | ✅ Flashing, version & H200 II fan confirmed |
+| **AD100Pro II** | Compact 100Ws round-head pocket strobe | [`AD100ProII/README.md`](AD100ProII/README.md) | ✅ Flashing, version & active fan confirmed |
+| **V100N** | 100Ws round-head speedlite (Nikon) | [`V100N/README.md`](V100N/README.md) | ✅ Flashing & version display confirmed |
+| **iT30ProN** | Ultra-compact mini speedlite (Nikon) | [`it30ProN/README.md`](it30ProN/README.md) | ✅ Flashing & version display confirmed |
+| **Tools** | Shared patcher & versioning library | [`tools/README.md`](tools/README.md) | ✅ Code verified |
+
+*Technical deep-dives: [**`FINDINGS.md`**](FINDINGS.md) (Reverse-Engineering Report) · [**`TIERED_RATINGS.md`**](TIERED_RATINGS.md) (Classification Specification) · [**`firmware_comparison_analysis.md`**](firmware_comparison_analysis.md) (Architectural Comparison Matrix)*
+
 ---
 
 > [!WARNING]
