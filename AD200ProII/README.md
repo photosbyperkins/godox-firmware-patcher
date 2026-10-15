@@ -3,7 +3,7 @@
 | Item | Value |
 |---|---|
 | OEM image | `AD200ProII_V1.05.bin` (387,248 bytes), SHA-256 `30783860ede87b4bd30678cf820a8f2f6e0d8bc505344d42de1d3561c69f400b` |
-| Custom builds | `AD200ProII_V1.05.02_recovery.bin` (Tier R), `AD200ProII_V1.05.03_super.bin` (Tier X) — **flashing & version display confirmed on hardware** (2026-10-10) |
+| Custom builds | `AD200ProII_V1.05.01_studio.bin` (Tier S), `AD200ProII_V1.05.02_recovery.bin` (Tier R), `AD200ProII_V1.05.03_super.bin` (Tier X) — **flashing, version display & continuous H200 II fan confirmed on hardware** (2026-10-14) |
 | Patcher | [`patch.py`](patch.py) (version scheme: [root README §1](../README.md#1-firmware-profiles--version-scheme)) |
 | Technical classification | [`../TIERED_RATINGS.md`](../TIERED_RATINGS.md) |
 
@@ -90,13 +90,19 @@ The version is printed by a variadic formatter from `V%d.%d%d` format strings, w
 
 This ensures both the Device Info screen and the settings-menu readout display the patched version consistently.
 
-### Tier R (`AD200ProII_V1.05.02_recovery.bin`, version `V1.05.02`)
+### Tier S: Studio (`AD200ProII_V1.05.01_studio.bin`, version `V1.05.01`)
+* Continuous `H200 II` cooling fan: File offset `0x178BA`: `28 78` → `01 20` (`ldrb r0, [r5]` → `movs r0, #1`); `0x1791A`: `2c 70` → `2f 70` (`strb r4, [r5]` → `strb r7, [r5]`). When `H200 II` (head code 6) is attached, body MCU transmits I2C slave `0x5C` Register `0x01` value `1` (Fan ON) unconditionally. For all non-fan heads, head detection branches to exit cleanly.
+* Single-burst and leaky-bucket limits remain 100% factory stock.
+* Version text `V1.05.01` (see above).
+
+### Tier R: Recovery (`AD200ProII_V1.05.02_recovery.bin`, version `V1.05.02`)
+* Tier S continuous `H200 II` head fan patch included.
 * Faster leaky-bucket drain: Heads {0, 1} [H200 / H200 II] 125 → 250 (`0x63CA`, `0x63CE`), Heads {2, 3, 4} [H200R / H200J / H200J II / R200] 100 → 200 (`0x63D4`, `0x63D8`). (`H200 II` secondary accumulator `[r5,#0x18]` drain of `165 / 5.0 s` is left stock).
 * Version text `V1.05.02` (see above).
 * Single-burst limits remain 100% factory stock.
 
-### Tier X (`AD200ProII_V1.05.03_super.bin`, version `V1.05.03`)
-* All Tier R drain changes included.
+### Tier X: Super (`AD200ProII_V1.05.03_super.bin`, version `V1.05.03`)
+* All Tier R drain and fan changes included.
 * Version text `V1.05.03`.
 * HSS Table C (`0x354FE`, 25 halfwords): reduced ~20% (185 → 148, 100 → 80, 80 → 64, 60 → 48, 40 → 32, 32 → 25).
 * HSS Table D (`0x35530`, 25 halfwords): reduced ~20% (120 → 96, 75 → 60, 60 → 48, 44 → 35, 30 → 24, 24 → 19).
@@ -105,8 +111,13 @@ This ensures both the Device Info screen and the settings-menu readout display t
 ## Verified Hardware Architecture & Thermal Protection
 
 - ✅ **Head fan (hardware & body-side I2C control):** The fresnel head (`H200 II`, head code `0x20000095 == 6`) has a built-in cooling fan, confirmed on hardware by the owner (2026-10-10), while the body itself has no fan. Disassembly of `fn_080237B0` (`0x08023850`–`0x080238CC`) confirms the body MCU directly switches the `H200 II` head fan over bit-banged I2C (PB6=SCL, PB7=SDA, slave `0x5C`, **Register `0x01`** via `fn_08011F1E`, state stored in `[0x200001CC]`):
-  - **Fan ON (`1`):** when the head's digital NTC (`[0x200001E6]`, I2C Reg `0x06`) is in `151..941`, or modeling lamp brightness `[0x200001E8] > 60`, or shot-counter bit `0x40` of `[0x200001F9]` is set after 5 full-power shots (`0x0801218E`–`0x080121BE`).
-  - **Fan OFF (`0`):** when `[0x200001E6] > 1084` (and modeling lamp ≤ 60 and shot-counter bit 0).
+  - **Stock Fan ON (`1`):** when the head's digital NTC (`[0x200001E6]`, I2C Reg `0x06`) is in `151..941`, or modeling lamp brightness `[0x200001E8] > 60`, or shot-counter bit `0x40` of `[0x200001F9]` is set after 5 full-power shots (`0x0801218E`–`0x080121BE`).
+  - **Stock Fan OFF (`0`):** when `[0x200001E6] > 1084` (and modeling lamp ≤ 60 and shot-counter bit 0).
+  - **Custom Firmware Mod (`Tier S, R, X`):** Patches `0x178BA` (`28 78` → `01 20`, `movs r0, #1`) and `0x1791A` (`2c 70` → `2f 70`, `strb r7, [r5]`), ensuring Register `0x01` value `1` (Fan ON) is transmitted unconditionally on every I2C cycle when `H200 II` is attached. For all non-fan heads (`r0 != 6`), the code branches to exit cleanly. **Continuous fan operation on physical hardware confirmed by owner (2026-10-14).**
+- ✅ **DFU Bootloader Resilience & Recovery:**
+  - The on-chip DFU bootloader resides in protected internal flash (`0x08000000`–`0x0800BFFF`).
+  - An accidental cross-model flash (e.g. flashing a 357 KB AD100Pro II image onto the 387 KB AD200Pro II) produces a non-boot state where the unit blinks its color group indicator and does not power on the LCD.
+  - However, the bootloader survives completely intact. Re-connecting to Godox G3 and flashing the correct `AD200ProII_V1.05.02_recovery.bin` (or factory `AD200ProII_V1.05.bin`) restores the strobe to full operational health immediately, confirming high bootloader resilience against accidental bricking.
 - ✅ **Hardware Overheat Sensors vs. Battery Voltage (`0x200000A4`):**
   - **Correction (`0x200000A4` is Battery Voltage, NOT NTC):** `fn_0800C8EC` (`0x200000A4 < 541.42` setting `[0x20000124] = 1` and `[0x2000005E] = 1`) is the **battery voltage monitor** (`fn_0800CD40` uses `0x200000A4` to draw the 4-bar battery icon at thresholds `770/732/695/655` and triggers low-battery power-off via `0x2000005E`).
   - **Analog Head NTC (`0x200000AE` in `fn_08015C78`):** For heads other than `H200 II` (`0x20000095 != 6`), `fn_08015C78` monitors ADC channel `0x200000AE`: `< 75` sets `[0x200001BA] = 5` (severe overheat) and calls `fn_0800E1E4` (forced cooldown); `< 132` calls `fn_0800E1E4` and sets `[0x200001EA] = 1`; recovers at `≥ 235` (`fn_0801233E`).

@@ -28,8 +28,8 @@ Each build shows a three-part version on the strobe's screen: the official Godox
 
 | Profile | Code | Tier Code | Changes | Single-Burst Protection | Repeated-Burst Protection |
 |---|---|---|---|---|---|
-| **Studio** | **S** | `.01` | Continuous fan level 2 | ✅ Stock | ✅ Stock (extra cooling) |
-| **Recovery** | **R** | `.02` | + 2× faster primary drain (16.0 pts/s vs 8.0) | ✅ Stock | ⚠️ Reduced (fan-assisted on AD600/AD100) |
+| **Studio** | **S** | `.01` | Continuous fan (AD600 Level 2 / AD100 / AD200 H200 II) | ✅ Stock | ✅ Stock (extra cooling) |
+| **Recovery** | **R** | `.02` | + 2× faster primary drain (16.0 pts/s vs 8.0) | ✅ Stock | ⚠️ Reduced (fan-assisted on AD600/AD200/AD100) |
 | **Super** | **X** | `.03` | + lower per-shot HSS table cost | ⚠️ Reduced | ⚠️ Reduced |
 | **Recovery+** | **R+** | `.04` | + 2× drain on primary and **pre-latch secondary** burst counters | ✅ Stock | ⚠️ Reduced (2× primary + 2× pre-latch secondary) |
 | **Super+** | **X+** | `.05` | + 2× drain (both) + lower HSS + **burst throttle bypassed** | ⚠️ Reduced (80 clean) | ⚠️ Reduced (2× on all pauses) |
@@ -60,13 +60,13 @@ Each build shows a three-part version on the strobe's screen: the official Godox
 ---
 
 ### 3.2 Godox AD200Pro II
-*Chassis: Modular pocket strobe. Passive main body with internal heatsink; the `H200 II` fresnel head (`0x20000095 == 6`) has a built-in cooling fan (confirmed on hardware 2026-10-10) controlled by the body firmware via bit-banged I2C slave `0x5C` reg `0x01` in `fn_080237B0` (`✅`). Flashing via Godox G3 and LCD version display confirmed on hardware (2026-10-10); functional endurance testing pending.*
+*Chassis: Modular pocket strobe. Passive main body with internal heatsink; the `H200 II` fresnel head (`0x20000095 == 6`) has a built-in cooling fan (confirmed on hardware 2026-10-10) controlled by the body firmware via bit-banged I2C slave `0x5C` reg `0x01` in `fn_080237B0` (`✅`). Flashing via Godox G3, LCD version display, and continuous H200 II fan mod confirmed on hardware (2026-10-14); functional endurance testing pending.*
 
 | Profile | Build File | Version Display | Modifications | Status |
 |---|---|---|---|---|
-| **Tier S (Studio)** | *Not built yet* | — | `fn_080237B0` (`0x080238C8`) drives the `H200 II` head fan via I2C reg `0x01` (`[0x200001CC]`). Other heads have no fan. | — |
-| **Tier R (Recovery)** | `AD200ProII_V1.05.02_recovery.bin` | `V1.05.02` | 2× primary drain: Heads {0, 1} [H200] `125` → `250`, Heads {2, 3, 4} [H200R / H200J / R200] `100` → `200` (`0x080123CA`–`D8`) | ✅ Code verified (passive body heatsink) |
-| **Tier X (Super)** | `AD200ProII_V1.05.03_super.bin` | `V1.05.03` | 2× drain + HSS tables C & D lowered ~20% (**33 → 41** shots at 185→148, **50 → 63** shots at 120→96) | ✅ Code verified (HSS 100-pulse tables; optical train 🔶) |
+| **Tier S (Studio)** | `AD200ProII_V1.05.01_studio.bin` | `V1.05.01` | Continuous `H200 II` head fan via I2C slave `0x5C` reg `0x01` (`0x178BA`: `28 78` → `01 20`; `0x1791A`: `2c 70` → `2f 70`). Stock limits. | ✅ Flashed & continuous H200 II fan confirmed on hardware (2026-10-14) |
+| **Tier R (Recovery)** | `AD200ProII_V1.05.02_recovery.bin` | `V1.05.02` | Continuous `H200 II` fan + 2× primary drain: Heads {0, 1} [H200] `125` → `250`, Heads {2, 3, 4} [H200R / H200J / R200] `100` → `200` (`0x080123CA`–`D8`) | ✅ Flashed & continuous H200 II fan confirmed on hardware (2026-10-14) |
+| **Tier X (Super)** | `AD200ProII_V1.05.03_super.bin` | `V1.05.03` | Continuous `H200 II` fan + 2× drain + HSS tables C & D lowered ~20% (**33 → 41** shots at 185→148, **50 → 63** shots at 120→96) | ✅ Code verified (HSS 100-pulse tables; optical train 🔶; continuous fan confirmed) |
 
 ---
 

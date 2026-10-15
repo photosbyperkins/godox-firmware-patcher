@@ -5,15 +5,18 @@ Godox AD200Pro II - Custom Firmware Multi-Profile Patcher
 Builds custom firmwares conforming to the Godox Custom Firmware
 Classification System (TIERED_RATINGS.md).
 
-Version scheme: <Godox version>.<tier code>, e.g. 1.05.02 (see tools/fwversion.py).
+Version scheme: <Godox version>.<tier code>, e.g. 1.05.01 (see tools/fwversion.py).
 
 Profiles (base V1.05):
 ----------------------
+- Tier S (Studio - 1.05.01):
+  Continuous cooling fan operation for the H200 II fresnel head (via I2C slave 0x5C).
+  Single-burst protection: 100% Stock. Repeated-burst protection: 100% Stock.
 - Tier R (Recovery - 1.05.02):
-  2x Accelerated Leaky Bucket Recovery (Bare bulb: 250, Speedlite: 200).
+  Continuous H200 II fan + 2x Accelerated Leaky Bucket Recovery (Bare bulb: 250, Speedlite: 200).
   Single-burst protection: Stock. Repeated-burst protection: Reduced.
 - Tier X (Super - 1.05.03):
-  2x Accelerated Drain + Lowered HSS Tables C & D (~20% reduction).
+  Continuous H200 II fan + 2x Accelerated Drain + Lowered HSS Tables C & D (~20% reduction).
   Expands continuous HSS burst headroom (+24% to +26%: 33 -> 41 on Table C, 50 -> 63 on Table D).
   Single-burst protection: Reduced. Repeated-burst protection: Reduced.
 """
@@ -38,6 +41,16 @@ DECAY_BARE_CMP = 0x63CA   # 0x080123CA
 DECAY_BARE_SUB = 0x63CE   # 0x080123CE
 DECAY_SPD_CMP  = 0x63D4   # 0x080123D4
 DECAY_SPD_SUB  = 0x63D8   # 0x080123D8
+
+# Fan patch offsets (fn_080237B0):
+# When H200 II (head code 6) is attached, body MCU drives the head fan via bit-banged
+# I2C slave 0x5C Register 0x01 (bl fn_08011F1E).
+# 0x080238BA (file 0x178BA): ldrb r0, [r5] (28 78) -> movs r0, #1 (01 20)
+#   Forces I2C fan command (Reg 1) to value 1 (Fan ON) unconditionally on every cycle.
+# 0x0802391A (file 0x1791A): strb r4, [r5] (2c 70) -> strb r7, [r5] (2f 70)
+#   Stores 1 (r7) instead of 0 (r4) into [r5] (0x200001CC) when temperature is cold.
+FAN_CMD_OFFSET   = 0x178BA  # 0x080238BA
+FAN_STATE_OFFSET = 0x1791A  # 0x0802391A
 
 # Version readouts: printf formats fed with hardcoded digits (1, 0, 5).
 # They are rewritten to fixed text; the digit immediates stay stock.
@@ -74,6 +87,14 @@ def apply_version(data, tier):
     for off, fmt in VER_FORMATS:
         fwversion.fixed_version_format(data, off, fmt, ver)
 
+def apply_fan(data):
+    if data[FAN_CMD_OFFSET:FAN_CMD_OFFSET+2] != b"\x28\x78":
+        raise ValueError("Unexpected bytes at fan I2C command offset (0x178BA)")
+    if data[FAN_STATE_OFFSET:FAN_STATE_OFFSET+2] != b"\x2c\x70":
+        raise ValueError("Unexpected bytes at fan state clear offset (0x1791A)")
+    data[FAN_CMD_OFFSET:FAN_CMD_OFFSET+2] = b"\x01\x20"
+    data[FAN_STATE_OFFSET:FAN_STATE_OFFSET+2] = b"\x2f\x70"
+
 def apply_decay(data):
     if data[DECAY_BARE_CMP] != 0x7D or data[DECAY_BARE_SUB] != 0x7D:
         raise ValueError("Unexpected bytes at bare bulb decay offsets")
@@ -98,8 +119,10 @@ def apply_hss_tables(data):
 
 def build_profile(base_data, profile, output_dir):
     data = bytearray(base_data)
-    apply_decay(data)
+    apply_fan(data)
 
+    if profile in ("R", "X"):
+        apply_decay(data)
     if profile == "X":
         apply_hss_tables(data)
     apply_version(data, profile)
@@ -148,7 +171,7 @@ def main():
         sys.exit(1)
 
     print(f"[*] Building Godox AD200Pro II Custom Firmwares from: {base_file}")
-    for profile in ("R", "X"):
+    for profile in ("S", "R", "X"):
         build_profile(base_data, profile, script_dir)
     print("[+] All profiles built successfully.")
 

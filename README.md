@@ -34,9 +34,9 @@ Custom builds use a three-part version: **`<Godox version>.<tier code>`**.
 | Tier code | Profile | Core Modification | Single-Burst Limit | Inter-Burst Recovery | Recommended Use Case |
 |---|---|---|---|---|---|
 | *(none)* | **Factory** | Official Godox OEM firmware (e.g. `1.08`) | Factory stock | Factory stock | Standard field / battery shooting |
-| **`.01`** | **Tier S (Studio)** | Continuous Fan Level 2 (high speed) | Factory stock | Factory stock *(enhanced cooling)* | AC adapter studio work / modeling lamp |
-| **`.02`** | **Tier R (Recovery)** | 2× faster drain (+ Fan on AD600 / AD100) | Factory stock | 2× primary recovery | Fast turnaround (portraits, events) |
-| **`.03`** | **Tier X (Super)** | 2× drain + ~20% lower HSS cost | **+24% to +26% burst** | 2× primary recovery | Action / HSS bursts |
+| **`.01`** | **Tier S (Studio)** | Continuous Fan (AD600 Level 2 / AD100 / AD200 H200 II) | Factory stock | Factory stock *(enhanced cooling)* | AC adapter studio work / modeling lamp |
+| **`.02`** | **Tier R (Recovery)** | 2× faster drain (+ Fan on AD600 / AD200 / AD100) | Factory stock | 2× primary recovery | Fast turnaround (portraits, events) |
+| **`.03`** | **Tier X (Super)** | 2× drain + ~20% lower HSS cost (+ Fan on AD600 / AD200 / AD100) | **+24% to +26% burst** | 2× primary recovery | Action / HSS bursts |
 | **`.04`** | **Tier R+ (Recovery+)** | Continuous Fan + 2× drain on primary & pre-latch secondary accumulators | Factory stock | **2× primary + 2× pre-latch secondary** | Synchronized pre-throttle burst recovery |
 | **`.05`** | **Tier X+ (Super+)** | Continuous Fan + 2× drain (both) + Lowered HSS + **Throttle bypassed** | **80 shots clean (no stutter)** | **2× on all pauses** | Maximum performance / continuous bursts |
 
@@ -61,13 +61,14 @@ Detailed reverse-engineering specifications are documented in [**TIERED_RATINGS.
 | **Tier X+ (Super+)** | `AD600PROII_v1.08.05_super_plus.bin` | `c62e16a60bee7cf534469e19dfc6acf21f821b7c3ecc570063099c58e2e0109e` | Fan Level 2 + 2× drain (both) + HSS table + Secondary burst throttle bypassed |
 
 ### 2.2 Godox AD200Pro II
-*Base: `AD200ProII_V1.05.bin` (387,248 bytes, Base `0x0800C000`)*
+*Base: `AD200ProII_V1.05.bin` (387,248 bytes, Base `0x0800C000`). Flashing, version display, and continuous H200 II fan confirmed on hardware (2026-10-14).*
 
 | Build | Output Filename | Target SHA-256 Checksum | Modifications |
 |---|---|---|---|
 | **OEM Stock** | `AD200ProII_V1.05.bin` | `30783860ede87b4bd30678cf820a8f2f6e0d8bc505344d42de1d3561c69f400b` | Factory baseline |
-| **Tier R (Recovery)** | `AD200ProII_V1.05.02_recovery.bin` | `c1cb659d626d054e74943d1cf2513e503f31a11c8d97db697336caff16937bf0` | 2× drain: bare bulb (125→250), speedlite (100→200) |
-| **Tier X (Super)** | `AD200ProII_V1.05.03_super.bin` | `8da2612a2f2ea0f201f4d33f444ff708d259cfcd736ffcf1899dc4fa06ee450f` | 2× drain + HSS tables C & D lowered ~20% |
+| **Tier S (Studio)** | `AD200ProII_V1.05.01_studio.bin` | `c26d91f59f85217474ab1e1b828e17f5370646c48621036a937aaea1394e9292` | Continuous `H200 II` head fan over I2C slave `0x5C` reg `0x01` |
+| **Tier R (Recovery)** | `AD200ProII_V1.05.02_recovery.bin` | `716b0048a784891858047c433d83c191b0442f00421ff034a222cdddb2b80c86` | Continuous `H200 II` fan + 2× drain: bare bulb (125→250), speedlite (100→200) |
+| **Tier X (Super)** | `AD200ProII_V1.05.03_super.bin` | `f4aacd86f89d2de6ba4128b883f3e85b0c85aab3b1986e5378fc2722be86f1b3` | Continuous `H200 II` fan + 2× drain + HSS tables C & D lowered ~20% |
 
 ### 2.3 Godox AD100Pro II
 *Base: `AD100ProII_RF433V1_07.bin` (357,004 bytes, Base `0x0800C000`)*
@@ -183,6 +184,9 @@ To revert to factory firmware at any time:
 1. Repeat the steps above, selecting your official OEM baseline file (e.g. `AD600PROII_v1.08.bin`, `AD200ProII_V1.05.bin`, `AD100ProII_RF433V1_07.bin`, `V100N_V1.04.bin`, or `iT30ProN_V1.02.bin`).
 2. Click **Upgrade**. The strobe will be restored to 100% factory behavior and display its original two-part version number (`v1.08`, `V1.05`, `V1.07`, `V1.04`, or `V1.02`).
 
+> [!TIP]
+> **DFU Bootloader Resilience:** The on-chip DFU bootloader is stored in protected flash memory (`0x08000000`–`0x0800BFFF`). Even in the event of an accidental cross-model flash (such as flashing an AD100Pro II image onto an AD200Pro II, which results in a blinking LED and non-booting display), the USB DFU bootloader remains intact. Simply reconnect the strobe to Godox G3 and re-flash the correct model firmware to restore the device completely.
+
 ---
 
 ## 5. Technical Documentation
@@ -252,6 +256,7 @@ The on-screen version only tells you the base firmware and the tier. A patcher f
 
 | Date | Model | Builds | Change | Superseded SHA-256 |
 |---|---|---|---|---|
+| 2026-10-14 | AD200Pro II | S, R, X | **H200 II continuous fan integration.** Added Tier S (`1.05.01` continuous cooling fan on `H200 II` fresnel head via I2C slave `0x5C` reg `0x01` in `fn_080237B0`). Updated Tier R (`1.05.02`) and Tier X (`1.05.03`) to include continuous `H200 II` head fan. Non-fan heads branch to exit cleanly. Flashing, version display, and continuous fan operation confirmed on hardware (2026-10-14). | R `c1cb659d626d054e74943d1cf2513e503f31a11c8d97db697336caff16937bf0`, X `8da2612a2f2ea0f201f4d33f444ff708d259cfcd736ffcf1899dc4fa06ee450f` |
 | 2026-10-11 | AD100Pro II | S, R, X | **Initial release.** Clean-room disassembly and reverse engineering of AD100Pro II v1.07 (`AD100ProII_RF433V1_07.bin`). Built Tier S (`1.07.01` continuous active fan on GPIOC Pin 4), Tier R (`1.07.02` fan + 2× drain on primary and secondary accumulators), and Tier X (`1.07.03` fan + 2× drain + 20% reduced HSS table expanding full-power burst to 75 shots). | — |
 | 2026-10-10 | All | All tiers | **Version scheme standardization.** Adopted unified `<Godox version>.<tier code>` string format across all models, and standardized patchers to `patch.py`. The version is patched as fixed text, and digit immediates stay stock. The AD200Pro II and V100N settings-menu version readout is now patched as well. Thermal patches are unchanged. | Early experimental images |
 | 2026-10-10 | iT30ProN | R, X | **MD5 footer fix.** The first iT30ProN images kept the stock MD5 at `0xA8000`, which the on-chip bootloader (or a newer updater tool; `Godox_G3_v1.1.exe` only checks `size <= 1 MB`) would reject. The patcher now recomputes it. | R `b9454658f204a4bf3a3cce4abb1b5f715132564b4925b7f638bc432e57ad5e78`, X `cee4c7bd45f6e30d44efc1f43b4eec0cd19443ecdefbbba08580f602125e8093` |
