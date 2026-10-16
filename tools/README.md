@@ -33,6 +33,25 @@ The patchers share this module for the version scheme (`<Godox version>.<tier co
 
 When Godox ships a new base firmware, update `GODOX_VERSION`, the base SHA-256 and every patch offset in that model's `patch.py`. Re-verify each offset against the new image, then add a row to the [build changelog](../README.md#8-build-changelog).
 
+## `tools/patcher_gui.py` & `tools/build_executable.py`
+
+Cross-platform drag-and-drop desktop patcher (**Windows `.exe`** and **macOS `.app`**) backed by [`tools/patcher_core.py`](patcher_core.py):
+
+```powershell
+# Run GUI directly from Python:
+python tools\patcher_gui.py
+
+# Pre-load a firmware file (same as dropping a .bin onto the .exe / .app icon):
+python tools\patcher_gui.py AD600ProII\AD600PROII_v1.08.bin
+
+# Run headlessly from CLI (single tier or all tiers):
+python tools\patcher_gui.py AD600ProII\AD600PROII_v1.08.bin --tier R
+python tools\patcher_gui.py AD600ProII\AD600PROII_v1.08.bin --tier all
+
+# Build standalone executable (dist/GodoxFirmwarePatcher.exe on Windows, .app on macOS):
+python tools\build_executable.py
+```
+
 ## `tools/disasm.py`
 
 ```powershell

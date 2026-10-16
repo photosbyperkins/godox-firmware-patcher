@@ -13,6 +13,9 @@ __pycache__/
 .Python
 env/
 venv/
+build/
+dist/
+*.spec
 
 # Windows
 Thumbs.db
