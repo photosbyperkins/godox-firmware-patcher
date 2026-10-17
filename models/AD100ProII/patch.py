@@ -3,7 +3,7 @@
 Godox AD100Pro II - Custom Firmware Multi-Tier Patcher
 ======================================================
 Builds custom firmwares conforming to the Godox Custom Firmware
-Classification System (TIERED_RATINGS.md).
+Classification System (docs/tiers.md).
 
 Version scheme: <Godox version>.<tier code>, e.g. 1.07.02 (see tools/fwversion.py).
 
@@ -30,7 +30,8 @@ import os
 import hashlib
 import struct
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
 import fwversion  # noqa: E402
 
 EXPECTED_SHA256 = "5dd2dd434e0ca531a57fd5ad397a9de1cf4e8acf2374aa6bfc5d7fed17c135dc"
@@ -160,11 +161,8 @@ def find_base_file(script_dir, filename):
 
     candidates = [
         os.path.join(script_dir, filename),
-        os.path.join(script_dir, "AD100ProII_RF433V1_07.bin"),
-        os.path.join(script_dir, "..", "_local_godox_assets", "AD100ProII", filename),
-        os.path.join(script_dir, "..", "_local_godox_assets", "AD100ProII", "AD100ProII_RF433V1_07.bin"),
-        os.path.join(script_dir, "..", filename),
-        os.path.join(script_dir, "..", "AD100ProII_RF433V1_07.bin")
+        os.path.join(REPO_ROOT, "_local_godox_assets", "AD100ProII", filename),
+        os.path.join(REPO_ROOT, filename)
     ]
     for c in candidates:
         if os.path.exists(c):
@@ -172,7 +170,8 @@ def find_base_file(script_dir, filename):
 
     print(f"[-] Error: Official base firmware '{filename}' not found.")
     print("    To build custom firmwares, please obtain the official firmware:")
-    print("    1. Place 'AD100ProII_RF433V1_07.bin' in this directory, or run:")
+    print("    1. Request official V1.07 from Godox support (it is not on the public download page)")
+    print(f"    2. Place '{filename}' in this directory, or run:")
     print(f"       python patch.py <path_to_{filename}>")
     sys.exit(1)
 

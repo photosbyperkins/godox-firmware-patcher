@@ -14,7 +14,7 @@ Version scheme
 
 Patch revisions of the same tier and base (bug fixes in a patcher) do not
 change the on-screen version. They are tracked by SHA-256 and the build
-changelog in the top-level README.
+changelog (CHANGELOG.md).
 """
 import hashlib
 

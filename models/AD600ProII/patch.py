@@ -3,7 +3,7 @@
 Godox AD600Pro II - Custom Firmware Multi-Tier Patcher
 ======================================================
 Builds custom firmwares conforming to the Godox Custom Firmware
-Classification System (TIERED_RATINGS.md).
+Classification System (docs/tiers.md).
 
 Version scheme: <Godox version>.<tier code>, e.g. 1.08.02 (see tools/fwversion.py).
 
@@ -28,7 +28,8 @@ import os
 import hashlib
 import struct
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
 import fwversion  # noqa: E402
 
 EXPECTED_SHA256 = "33e327457bef0023af5254153a990a572c6a3afeb792fdb84e5bf137613bf910"
@@ -168,8 +169,8 @@ def find_base_file(script_dir, filename):
 
     candidates = [
         os.path.join(script_dir, filename),
-        os.path.join(script_dir, "..", "_local_godox_assets", "AD600ProII", filename),
-        os.path.join(script_dir, "..", filename)
+        os.path.join(REPO_ROOT, "_local_godox_assets", "AD600ProII", filename),
+        os.path.join(REPO_ROOT, filename)
     ]
     for c in candidates:
         if os.path.exists(c):

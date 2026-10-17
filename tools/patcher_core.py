@@ -21,8 +21,11 @@ if TOOLS_DIR not in sys.path:
 import fwversion  # noqa: E402
 
 
+MODELS_DIRNAME = "models"
+
+
 def get_bundle_root() -> str:
-    """Return the root directory containing model subdirectories (supports PyInstaller _MEIPASS)."""
+    """Return the repo root (or PyInstaller _MEIPASS), which contains models/<model_id>/patch.py."""
     if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
         return sys._MEIPASS  # type: ignore[attr-defined]
     return os.path.abspath(os.path.join(TOOLS_DIR, ".."))
@@ -43,7 +46,7 @@ class TierOption:
 
 @dataclass(frozen=True)
 class ModelSpec:
-    model_id: str          # Directory name, e.g. "AD600ProII"
+    model_id: str          # Directory under models/, e.g. "AD600ProII"
     display_name: str      # e.g. "Godox AD600Pro II"
     category: str          # e.g. "600Ws Studio Strobe"
     oem_filename: str      # e.g. "AD600PROII_v1.08.bin"
@@ -59,7 +62,8 @@ class ModelSpec:
         return f"{self.v_prefix}{fwversion.godox_version(*self.godox_version)}"
 
 
-# Verified model & tier specifications matching README.md and TIERED_RATINGS.md
+# Verified model & tier specifications. Hashes must match the output of
+# models/<model_id>/patch.py and the tables in models/<model_id>/README.md.
 MODEL_SPECS: Tuple[ModelSpec, ...] = (
     ModelSpec(
         model_id="AD600ProII",
@@ -257,7 +261,7 @@ MODEL_SPECS: Tuple[ModelSpec, ...] = (
         ),
     ),
     ModelSpec(
-        model_id="it30ProN",
+        model_id="iT30ProN",
         display_name="Godox iT30ProN (Nikon)",
         category="Ultra-Compact Mini Speedlite",
         oem_filename="iT30ProN_V1.02.bin",
@@ -398,9 +402,9 @@ def identify_firmware(file_path: str) -> DetectionResult:
 
 
 def _load_model_patcher(model_id: str):
-    """Dynamically load <model_id>/patch.py from source tree or PyInstaller bundle."""
+    """Dynamically load models/<model_id>/patch.py from source tree or PyInstaller bundle."""
     bundle_root = get_bundle_root()
-    patch_script = os.path.join(bundle_root, model_id, "patch.py")
+    patch_script = os.path.join(bundle_root, MODELS_DIRNAME, model_id, "patch.py")
     if not os.path.isfile(patch_script):
         raise FileNotFoundError(f"Model patcher script not found: {patch_script}")
 

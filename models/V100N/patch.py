@@ -3,7 +3,7 @@
 Godox V100N - Custom Firmware Multi-Profile Patcher
 ===================================================
 Builds custom firmwares conforming to the Godox Custom Firmware
-Classification System (TIERED_RATINGS.md).
+Classification System (docs/tiers.md).
 
 Version scheme: <Godox version>.<tier code>, e.g. 1.04.02 (see tools/fwversion.py).
 
@@ -24,7 +24,8 @@ import os
 import hashlib
 import struct
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
 import fwversion  # noqa: E402
 
 EXPECTED_SHA256 = "18e3581c601cc7c15e81bbbe951b8b336e133de822f99450f57f116ffab37ee6"
@@ -122,8 +123,8 @@ def find_base_file(script_dir, filename):
     candidates = [
         os.path.join(script_dir, filename),
         os.path.join(script_dir, filename.lower()),
-        os.path.join(script_dir, "..", "_local_godox_assets", "V100N", filename),
-        os.path.join(script_dir, "..", filename)
+        os.path.join(REPO_ROOT, "_local_godox_assets", "V100N", filename),
+        os.path.join(REPO_ROOT, filename)
     ]
     for c in candidates:
         if os.path.exists(c):

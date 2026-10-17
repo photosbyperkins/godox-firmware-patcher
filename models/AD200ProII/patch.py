@@ -3,7 +3,7 @@
 Godox AD200Pro II - Custom Firmware Multi-Profile Patcher
 =========================================================
 Builds custom firmwares conforming to the Godox Custom Firmware
-Classification System (TIERED_RATINGS.md).
+Classification System (docs/tiers.md).
 
 Version scheme: <Godox version>.<tier code>, e.g. 1.05.01 (see tools/fwversion.py).
 
@@ -13,7 +13,8 @@ Profiles (base V1.05):
   Continuous cooling fan operation for the H200 II fresnel head (via I2C slave 0x5C).
   Single-burst protection: 100% Stock. Repeated-burst protection: 100% Stock.
 - Tier R (Recovery - 1.05.02):
-  Continuous H200 II fan + 2x Accelerated Leaky Bucket Recovery (Bare bulb: 250, Speedlite: 200).
+  Continuous H200 II fan + 2x Accelerated Leaky Bucket Recovery
+  (head group A [H200, H200 II, AD-L]: 125 -> 250; group B [H200R, H200J, H200J II, R200]: 100 -> 200).
   Single-burst protection: Stock. Repeated-burst protection: Reduced.
 - Tier X (Super - 1.05.03):
   Continuous H200 II fan + 2x Accelerated Drain + Lowered HSS Tables C & D (~20% reduction).
@@ -26,7 +27,8 @@ import os
 import hashlib
 import struct
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
 import fwversion  # noqa: E402
 
 EXPECTED_SHA256 = "30783860ede87b4bd30678cf820a8f2f6e0d8bc505344d42de1d3561c69f400b"
@@ -37,10 +39,12 @@ OUT_PREFIX = "AD200ProII"
 BASE_ADDR = 0x0800C000
 
 # Offsets
-DECAY_BARE_CMP = 0x63CA   # 0x080123CA
-DECAY_BARE_SUB = 0x63CE   # 0x080123CE
-DECAY_SPD_CMP  = 0x63D4   # 0x080123D4
-DECAY_SPD_SUB  = 0x63D8   # 0x080123D8
+# Drain routine fn_08012370: head group A (0x20000093 not in {2,3,4}) drains 125 pts,
+# group B (0x20000093 in {2,3,4}) drains 100 pts, every 50 steps (5.0 s).
+DECAY_GRP_A_CMP = 0x63CA   # 0x080123CA
+DECAY_GRP_A_SUB = 0x63CE   # 0x080123CE
+DECAY_GRP_B_CMP = 0x63D4   # 0x080123D4
+DECAY_GRP_B_SUB = 0x63D8   # 0x080123D8
 
 # Fan patch offsets (fn_080237B0):
 # When H200 II (head code 6) is attached, body MCU drives the head fan via bit-banged
@@ -96,14 +100,14 @@ def apply_fan(data):
     data[FAN_STATE_OFFSET:FAN_STATE_OFFSET+2] = b"\x2f\x70"
 
 def apply_decay(data):
-    if data[DECAY_BARE_CMP] != 0x7D or data[DECAY_BARE_SUB] != 0x7D:
-        raise ValueError("Unexpected bytes at bare bulb decay offsets")
-    if data[DECAY_SPD_CMP] != 0x64 or data[DECAY_SPD_SUB] != 0x64:
-        raise ValueError("Unexpected bytes at speedlite decay offsets")
-    data[DECAY_BARE_CMP] = 250
-    data[DECAY_BARE_SUB] = 250
-    data[DECAY_SPD_CMP] = 200
-    data[DECAY_SPD_SUB] = 200
+    if data[DECAY_GRP_A_CMP] != 0x7D or data[DECAY_GRP_A_SUB] != 0x7D:
+        raise ValueError("Unexpected bytes at head group A decay offsets")
+    if data[DECAY_GRP_B_CMP] != 0x64 or data[DECAY_GRP_B_SUB] != 0x64:
+        raise ValueError("Unexpected bytes at head group B decay offsets")
+    data[DECAY_GRP_A_CMP] = 250
+    data[DECAY_GRP_A_SUB] = 250
+    data[DECAY_GRP_B_CMP] = 200
+    data[DECAY_GRP_B_SUB] = 200
 
 def apply_hss_tables(data):
     curr_c = list(struct.unpack_from('<25H', data, TABLE_C_OFFSET))
@@ -149,8 +153,8 @@ def find_base_file(script_dir, filename):
     candidates = [
         os.path.join(script_dir, filename),
         os.path.join(script_dir, filename.lower()),
-        os.path.join(script_dir, "..", "_local_godox_assets", "AD200ProII", filename),
-        os.path.join(script_dir, "..", filename)
+        os.path.join(REPO_ROOT, "_local_godox_assets", "AD200ProII", filename),
+        os.path.join(REPO_ROOT, filename)
     ]
     for c in candidates:
         if os.path.exists(c):

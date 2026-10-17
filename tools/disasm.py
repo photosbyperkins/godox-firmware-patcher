@@ -15,7 +15,7 @@ Features
   * Side outputs: <name>.functions.csv and <name>.strings.txt
 
 Usage
-  python tools/disasm.py                       # every model in MODELS
+  python tools/disasm.py                       # every model in MODELS -> models/<Model>/disasm/
   python tools/disasm.py AD600ProII            # one model
   python tools/disasm.py --file X.bin --base 0x0800C000 [--out DIR]
   python tools/disasm.py --file X.bin --detect # list candidate load addresses
@@ -33,14 +33,15 @@ from capstone import Cs, CS_ARCH_ARM, CS_MODE_THUMB, CS_MODE_MCLASS, CS_OP_IMM, 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# model -> (stock image path relative to repo root, load address)
+# model (directory under models/) -> (stock image filename, load address)
 MODELS = {
-    "AD600ProII": ("AD600ProII/AD600PROII_v1.08.bin", 0x0800C000),
-    "AD200ProII": ("AD200ProII/AD200ProII_V1.05.bin", 0x0800C000),
-    "AD100ProII": ("AD100ProII/AD100ProII_RF433V1_07.bin", 0x0800C000),
-    "V100N":      ("V100N/V100N_V1.04.bin",           0x08008000),
-    "it30ProN":   ("it30ProN/iT30ProN_V1.02.bin",     0x0800C000),
+    "AD600ProII": ("AD600PROII_v1.08.bin",      0x0800C000),
+    "AD200ProII": ("AD200ProII_V1.05.bin",      0x0800C000),
+    "AD100ProII": ("AD100ProII_RF433V1_07.bin", 0x0800C000),
+    "V100N":      ("V100N_V1.04.bin",           0x08008000),
+    "iT30ProN":   ("iT30ProN_V1.02.bin",        0x0800C000),
 }
+MODELS_DIR = os.path.join(ROOT, "models")
 
 FLASH_LO, FLASH_HI = 0x08000000, 0x08200000
 
@@ -435,10 +436,10 @@ def main():
     for m in names:
         if m not in MODELS:
             sys.exit(f"unknown model {m}; known: {', '.join(MODELS)}")
-        rel, base = MODELS[m]
-        path = os.path.join(ROOT, rel)
-        out = args.out or os.path.join(ROOT, m, 'disasm')
-        process(path, base, out, f"{m} ({os.path.basename(rel)})")
+        fname, base = MODELS[m]
+        path = os.path.join(MODELS_DIR, m, fname)
+        out = args.out or os.path.join(MODELS_DIR, m, 'disasm')
+        process(path, base, out, f"{m} ({fname})")
 
 
 if __name__ == '__main__':

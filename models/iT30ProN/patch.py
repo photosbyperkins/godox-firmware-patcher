@@ -3,7 +3,7 @@
 Godox iT30ProN - Custom Firmware Multi-Profile Patcher
 ======================================================
 Builds custom firmwares conforming to the Godox Custom Firmware
-Classification System (TIERED_RATINGS.md).
+Classification System (docs/tiers.md).
 
 Target Model: Godox iT30Pro for Nikon (iT30ProN)
 OEM Base: iT30ProN_V1.02.bin (688,172 bytes)
@@ -28,7 +28,8 @@ import os
 import hashlib
 import struct
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
 import fwversion  # noqa: E402
 
 EXPECTED_SHA256 = "a6920833d267834e7ff41f537ce8b897bab47234013731ae79b4affcbf41847e"
@@ -160,8 +161,8 @@ def find_base_file(script_dir, filename):
     candidates = [
         os.path.join(script_dir, filename),
         os.path.join(script_dir, filename.lower()),
-        os.path.join(script_dir, "..", "_local_godox_assets", "it30ProN", filename),
-        os.path.join(script_dir, "..", filename)
+        os.path.join(REPO_ROOT, "_local_godox_assets", "iT30ProN", filename),
+        os.path.join(REPO_ROOT, filename)
     ]
     for c in candidates:
         if os.path.exists(c):

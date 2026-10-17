@@ -20,12 +20,13 @@ TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(TOOLS_DIR, ".."))
 APP_NAME = "GodoxFirmwarePatcher"
 
+MODELS_DIRNAME = "models"
 MODEL_DIRS = [
     "AD600ProII",
     "AD200ProII",
     "AD100ProII",
     "V100N",
-    "it30ProN",
+    "iT30ProN",
 ]
 
 
@@ -86,13 +87,15 @@ def main() -> int:
         "patcher_core",
     ]
 
-    # Bundle each model's patch.py into <model_dir>/patch.py inside the executable
+    # Bundle each model's patch.py into models/<model_dir>/patch.py inside the executable
+    # (patcher_core loads it from the same relative path).
     for model_dir in MODEL_DIRS:
-        patch_py = os.path.join(REPO_ROOT, model_dir, "patch.py")
+        rel_dir = os.path.join(MODELS_DIRNAME, model_dir)
+        patch_py = os.path.join(REPO_ROOT, rel_dir, "patch.py")
         if not os.path.isfile(patch_py):
             print(f"[-] Missing model patcher: {patch_py}")
             return 1
-        cmd.extend(["--add-data", f"{patch_py}{sep}{model_dir}"])
+        cmd.extend(["--add-data", f"{patch_py}{sep}{rel_dir}"])
 
     # On Windows/Linux, build a single self-contained file (--onefile).
     # On macOS, --windowed --onedir produces a faster-launching .app bundle (or --onefile also creates .app).
